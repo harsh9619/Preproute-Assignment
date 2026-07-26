@@ -38,3 +38,8 @@ export const API_ENDPOINTS = {
   questions: '/questions/bulk',
   questionsFetch: '/questions/fetchBulk'
 };
+
+export const NO_DATA = 'No Data Found';
+
+export { getDashboardColumns } from './dashboardColumns';
+

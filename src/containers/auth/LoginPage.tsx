@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, useTast } from '../../store';
+import { toast } from 'react-toastify';
+import { useAuth } from '../../store';
 import LoginView from '../../components/auth/LoginView';
 
 interface FormErrors {
@@ -17,12 +18,12 @@ const LoginPage: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // useEffect(() => {
-  //   // If already logged in, redirect directly to dashboard
-  //   if (isAuthenticated) {
-  //     navigate('/');
-  //   }
-  // }, [isAuthenticated, navigate]);
+  useEffect(() => {
+    // If already logged in, redirect directly to dashboard
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -47,14 +48,14 @@ const LoginPage: React.FC = () => {
       const result = await login(userId.trim(), password);
       setIsSubmitting(false);
       if (result.success) {
-         window.alert(`Login successful! Welcome back ${result.user?.name || 'User'}!`);
+         toast.success(`Login successful! Welcome back ${result.user?.name || 'User'}!`);
+          navigate('/');
       } else {
-        
-         window.alert(result.message || 'Invalid User ID or password');
+         toast.error(result.message || 'Invalid User ID or password');
       }
     } catch (err: any) {
       setIsSubmitting(false);
-       window.alert(err.message || 'An error occurred during login');
+       toast.error(err.message || 'An error occurred during login');
     }
   };
 

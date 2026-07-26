@@ -1,3 +1,7 @@
+import {
+  ReactNode,
+} from 'react';
+
 export interface User {
   userId: string;
 }
@@ -9,20 +13,27 @@ export interface AuthState {
   error: string | null;
 }
 
-export interface Toast {
-  id: string;
-  message: string;
-  type: 'success' | 'danger' | 'warning' | 'info';
-  duration?: number;
+export interface TestsState {
+  tests: Test[];
+  currentTest: Test | null;
+  subjects: Subject[];
+  topics: Topic[];
+  subTopics: SubTopic[];
+  loading: boolean;
+  loadingCount?: number;
+  error: string | null;
 }
 
-export interface ToastState {
-  toasts: Toast[];
+export interface QuestionsState {
+  questions: Question[];
+  loading: boolean;
+  error: string | null;
 }
 
 export interface RootState {
   auth: AuthState;
-  toast: ToastState;
+  tests: TestsState;
+  questions: QuestionsState;
 }
 
 export interface Subject {
@@ -76,5 +87,42 @@ export interface Test {
   status: 'draft' | 'live';
   created_at: string;
   total_questions?: number;
+}
+
+export interface NoDataComponentProps {
+  message: string | ReactNode,
+  className: string,
+  description?: string
+  showErrorIcon?: boolean;
+  img?: string;
+}
+
+export interface DashboardViewProps {
+  tests: Test[];
+  subjects: Subject[];
+  loading: boolean;
+  searchTerm: string;
+  setSearchTerm: (val: string) => void;
+  selectedSubject: string;
+  setSelectedSubject: (val: string) => void;
+  selectedStatus: string;
+  setSelectedStatus: (val: string) => void;
+  selectedDifficulty: string;
+  setSelectedDifficulty: (val: string) => void;
+  deleteId: string | null;
+  setDeleteId: (val: string | null) => void;
+  viewTest: Test | null;
+  setViewTest: (val: Test | null) => void;
+  viewQuestions: Question[];
+  viewLoading: boolean;
+  totalTests: number;
+  liveTests: number;
+  draftTests: number;
+  totalQuestions: number;
+  filteredTests: Test[];
+  handleDeleteClick: (id: string, e: React.MouseEvent) => void;
+  handleConfirmDelete: () => void;
+  handleViewClick: (testId: string, e: React.MouseEvent) => void;
+  navigate: (path: string) => void;
 }
 

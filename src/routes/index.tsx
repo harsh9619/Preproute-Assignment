@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../store';
 
 // Containers/Pages imports
 import LoginPage from '../containers/auth/LoginPage';
+import DashboardPage from '../containers/tests/DashboardPage';
+import CreateTestPage from '../containers/tests/CreateTestPage';
+
 
 // Components imports
-import Navbar from '../components/navbar/Navbar';
+import Sidebar from '../components/sidebar/Sidebar';
+import Header from '../components/header/Header';
 
 interface RouteWrapperProps {
   children: React.ReactNode;
@@ -35,21 +39,47 @@ const ProtectedRoute: React.FC<RouteWrapperProps> = ({ children }) => {
 
 // Layout Wrapper
 const Layout: React.FC<RouteWrapperProps> = ({ children }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="app-container">
-      <Navbar />
-      <main className="content-wrapper">{children}</main>
+    <div className="flex min-h-screen bg-slate-50/50">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+        <Header onToggleSidebar={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
+      </div>
     </div>
   );
 };
+
 
 export const AppRouter: React.FC = () => {
   return (
     <>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        
-       
+
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <DashboardPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/create-test"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CreateTestPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
