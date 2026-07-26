@@ -1,0 +1,10 @@
+{
+  "login": {
+    "title": "PrepRoute",
+    "subtitle": "Test Management Application",
+    "userId": "User ID",
+    "password": "Password",
+    "signIn": "Sign In",
+    "authenticating": "Authenticating..."
+  }
+}
