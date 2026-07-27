@@ -6,6 +6,8 @@ import { useAuth } from '../store';
 import LoginPage from '../containers/auth/LoginPage';
 import DashboardPage from '../containers/tests/DashboardPage';
 import CreateTestPage from '../containers/tests/CreateTestPage';
+import AddQuestionsPage from '../containers/tests/AddQuestionsPage';
+import PreviewPublishPage from '../containers/tests/PreviewPublishPage';
 
 
 // Components imports
@@ -76,6 +78,39 @@ export const AppRouter: React.FC = () => {
             <ProtectedRoute>
               <Layout>
                 <CreateTestPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/edit-test/:id"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <CreateTestPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/test/:id/questions"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <AddQuestionsPage />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/test/:id/preview"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <PreviewPublishPage />
               </Layout>
             </ProtectedRoute>
           }

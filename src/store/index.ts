@@ -2,7 +2,7 @@ import { legacy_createStore as createStore, applyMiddleware, combineReducers } f
 import createSagaMiddleware from 'redux-saga';
 import { all } from 'redux-saga/effects';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from './types';
+import { RootState, User } from './types';
 
 // Import module reducers
 import authReducer from './auth/reducer';
@@ -68,7 +68,7 @@ export const useAuth = () => {
   const auth = useSelector((state: RootState) => state.auth);
 
   const login = (userId: string, password: string) =>
-    new Promise<{ success: boolean; message?: string }>((resolve, reject) => {
+    new Promise<{ success: boolean; message?: string; user?: User | null }>((resolve, reject) => {
       dispatch(loginRequest({ userId, password, resolve, reject }));
     });
 

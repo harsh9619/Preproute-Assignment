@@ -1,222 +1,255 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useTests } from '../../store';
 import { toast } from 'react-toastify';
+import { api } from '../../services';
+import { useTests } from '../../store';
+import { Subject, Topic, SubTopic, TestFormData } from '../../store/types';
 import CreateTestView from '../../components/tests/CreateTestView';
-
-interface FormErrors {
-  name?: string;
-  subject?: string;
-  topics?: string;
-  sub_topics?: string;
-  correct_marks?: string;
-  wrong_marks?: string;
-  unattempt_marks?: string;
-  total_time?: string;
-  total_marks?: string;
-}
+import PageLoaderComponent from '../../components/common/page-loader';
 
 const CreateTestPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // present if editing
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
   const isEditMode = !!id;
 
-  const {
-    subjects: subjectsOptions,
-    topics: topicsOptions,
-    subTopics: subTopicsOptions,
-    currentTest,
-    loading: storeLoading,
-    fetchSubjects,
-    fetchTopics,
-    fetchSubTopics,
-    fetchTest,
-    createTest,
-    updateTest
-  } = useTests();
+  const { createTest, updateTest } = useTests();
 
-  // Form fields state
-  const [name, setName] = useState('');
-  const [subject, setSubject] = useState('');
-  const [type, setType] = useState('chapterwise');
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  const [selectedSubTopics, setSelectedSubTopics] = useState<string[]>([]);
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
-  const [correctMarks, setCorrectMarks] = useState<number | string>(4);
-  const [wrongMarks, setWrongMarks] = useState<number | string>(-1);
-  const [unattemptMarks, setUnattemptMarks] = useState<number | string>(0);
-  const [totalTime, setTotalTime] = useState<number | string>(60);
-  const [totalMarks, setTotalMarks] = useState<number | string>(100);
+  // Loading state
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Local UI states
-  const [pageLoading, setPageLoading] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [topicsDropdownOpen, setTopicsDropdownOpen] = useState(false);
-  const [subTopicsDropdownOpen, setSubTopicsDropdownOpen] = useState(false);
+  // Dropdown lists
+  const [subjectsList, setSubjectsList] = useState<Subject[]>([]);
+  const [topicsList, setTopicsList] = useState<Topic[]>([]);
+  const [subTopicsList, setSubTopicsList] = useState<SubTopic[]>([]);
 
-  // Refs for closing dropdowns on click outside
-  const topicsRef = useRef<HTMLDivElement>(null);
-  const subTopicsRef = useRef<HTMLDivElement>(null);
+  // Form State
+  const [formData, setFormData] = useState<TestFormData>({
+    name: '',
+    subject: '',
+    type: 'chapterwise',
+    topics: [],
+    sub_topics: [],
+    difficulty: 'medium',
+    correct_marks: 5,
+    wrong_marks: -1,
+    unattempt_marks: 0,
+    total_time: 60,
+    total_marks: 250,
+    total_questions: 50
+  });
 
-  // Handle outside click to close dropdowns
+  // Errors State
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Initialize Page Data
   useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (topicsRef.current && !topicsRef.current.contains(e.target as Node)) {
-        setTopicsDropdownOpen(false);
-      }
-      if (subTopicsRef.current && !subTopicsRef.current.contains(e.target as Node)) {
-        setSubTopicsDropdownOpen(false);
+    const initPage = async () => {
+      setLoading(true);
+      try {
+        // Fetch subjects
+        const subjectsRes = await api.getSubjects();
+        if (subjectsRes.status || subjectsRes.success) {
+          setSubjectsList(subjectsRes.data);
+        }
+        if (id) {
+          // Fetch test details
+          const testRes = await api.getTest(id);
+          if (testRes.status || testRes.success) {
+            const test = testRes.data;
+            // Find the subject ID by matching test.subject with name or id from the subjects list
+            const matchedSubject = (subjectsRes.data || []).find(
+              (sub: any) => sub.name?.toLowerCase() === test.subject?.toLowerCase()
+            );
+            const subjectId = matchedSubject ? matchedSubject.id : test.subject;
+
+            // Fetch topics for this subject
+            let topicIds: string[] = [];
+            const topicsRes = await api.getTopics(subjectId || test.subject);
+            if (topicsRes.status || topicsRes.success) {
+              setTopicsList(topicsRes.data);
+
+              // Resolve topic names/ids to their corresponding IDs from topicsRes.data
+
+              if (test.topics && test.topics.length > 0) {
+                topicIds = test.topics
+                  .map((tNameOrId: string) => {
+                    if (!tNameOrId) return undefined;
+                    const matchedTopic = (topicsRes.data || []).find(
+                      (t: any) => t.name?.toLowerCase() === tNameOrId.toLowerCase() || t.id === tNameOrId
+                    );
+                    return matchedTopic ? matchedTopic.id : undefined;
+                  })
+                  .filter((id: string | undefined): id is string => id !== undefined);
+              }
+            }
+
+            // Fetch subtopics for these topics
+            let subTopicIds: string[] = [];
+            if (topicIds.length > 0) {
+              console.log("topicIds", topicIds);
+              debugger
+              const subTopicsRes = await api.getSubTopicsMulti(topicIds);
+              if (subTopicsRes.status || subTopicsRes.success) {
+                setSubTopicsList(subTopicsRes.data);
+
+                // Resolve sub-topic names/ids to their corresponding IDs from subTopicsRes.data
+                if (test.sub_topics && test.sub_topics.length > 0) {
+                  subTopicIds = test.sub_topics
+                    .map((stNameOrId: string) => {
+                      if (!stNameOrId) return undefined;
+                      const matchedSubTopic = (subTopicsRes.data || []).find(
+                        (st: any) => st.name?.toLowerCase() === stNameOrId.toLowerCase() || st.id === stNameOrId
+                      );
+                      return matchedSubTopic ? matchedSubTopic.id : undefined;
+                    })
+                    .filter((id: string | undefined): id is string => id !== undefined);
+                }
+              }
+            }
+
+            setFormData({
+              name: test.name || '',
+              subject: subjectId,
+              type: test.type || 'chapterwise',
+              topics: topicIds,
+              sub_topics: subTopicIds,
+              difficulty: test.difficulty || 'medium',
+              correct_marks: test.correct_marks !== undefined ? test.correct_marks : 4,
+              wrong_marks: test.wrong_marks !== undefined ? test.wrong_marks : -1,
+              unattempt_marks: test.unattempt_marks !== undefined ? test.unattempt_marks : 0,
+              total_time: test.total_time ?? 60,
+              total_marks: test.total_marks ?? 250,
+              total_questions: test.total_questions ?? 50
+            });
+          } else {
+            toast.error('Failed to load test details.');
+          }
+        }
+      } catch (err: any) {
+        toast.error(err.message || 'Error loading initialization data.');
+      } finally {
+        setLoading(false);
       }
     };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, []);
 
-  // Fetch subjects on mount
+    initPage();
+  }, [id]);
+
+  // Handle subject change (fetch topics and clear selections)
   useEffect(() => {
-    fetchSubjects();
-  }, []);
+    if (!loading && formData.subject) {
+      const fetchTopicsForSubject = async () => {
+        try {
+          const res = await api.getTopics(formData.subject);
+          if (res.status || res.success) {
+            setTopicsList(res.data);
+          }
+        } catch (err: any) {
+          toast.error(err.message || 'Failed to load topics.');
+        }
+      };
 
-  // Load existing test details if in Edit Mode
-  useEffect(() => {
-    if (!isEditMode || !id) return;
-    fetchTest(id);
-  }, [id, isEditMode]);
+      fetchTopicsForSubject();
 
-  // Populate fields when currentTest is loaded
-  useEffect(() => {
-    if (!isEditMode || !currentTest || currentTest.id !== id) return;
-
-    if (currentTest.status === 'live') {
-      toast.warning('Live tests cannot be edited.');
-      navigate('/');
-      return;
+      setFormData(prev => ({
+        ...prev,
+        topics: [],
+        sub_topics: []
+      }));
+      setSubTopicsList([]);
     }
+  }, [formData.subject, loading]);
 
-    setName(currentTest.name);
-    setSubject(currentTest.subject); // Subject UUID
-    setType(currentTest.type);
-    setDifficulty(currentTest.difficulty);
-    setCorrectMarks(currentTest.correct_marks);
-    setWrongMarks(currentTest.wrong_marks);
-    setUnattemptMarks(currentTest.unattempt_marks);
-    setTotalTime(currentTest.total_time);
-    setTotalMarks(currentTest.total_marks);
-
-    // Fetch topics for this subject
-    fetchTopics(currentTest.subject);
-  }, [currentTest, isEditMode, id]);
-
-  // Set selected topics and fetch subtopics when topicsOptions change (on initial load for edit mode)
+  // Handle topics change (fetch subtopics and filter selected ones)
   useEffect(() => {
-    if (isEditMode && currentTest && currentTest.id === id && topicsOptions.length > 0) {
-      setSelectedTopics(currentTest.topics || []);
-      if (currentTest.topics && currentTest.topics.length > 0) {
-        fetchSubTopics(currentTest.topics);
+    if (!loading) {
+      if (formData.topics.length === 0) {
+        setSubTopicsList([]);
+        setFormData(prev => ({ ...prev, sub_topics: [] }));
+        return;
       }
+
+      const fetchSubTopicsForTopics = async () => {
+        try {
+          const res = await api.getSubTopicsMulti(formData.topics);
+          if (res.status || res.success) {
+            const fetchedSubTopics: SubTopic[] = res.data;
+            setSubTopicsList(fetchedSubTopics);
+
+            // Filter out selected sub-topics that don't belong to the fetched sub-topics
+            const validIds = fetchedSubTopics.map(st => st.id);
+            setFormData(prev => ({
+              ...prev,
+              sub_topics: prev.sub_topics.filter(id => validIds.includes(id))
+            }));
+          }
+        } catch (err: any) {
+          toast.error(err.message || 'Failed to load sub-topics.');
+        }
+      };
+
+      fetchSubTopicsForTopics();
     }
-  }, [topicsOptions, currentTest, isEditMode, id]);
+  }, [formData.topics, loading]);
 
-  // Populate selected subtopics when subTopicsOptions are loaded (on initial load for edit mode)
-  useEffect(() => {
-    if (isEditMode && currentTest && currentTest.id === id && subTopicsOptions.length > 0) {
-      setSelectedSubTopics(currentTest.sub_topics || []);
-    }
-  }, [subTopicsOptions, currentTest, isEditMode, id]);
-
-  // Load topics when subject changes (for creation/interaction)
-  const handleSubjectChange = (subjectId: string) => {
-    setSubject(subjectId);
-    setSelectedTopics([]);
-    setSelectedSubTopics([]);
-
-    if (subjectId) {
-      fetchTopics(subjectId);
-    }
-  };
-
-  // Load sub-topics when selected topics change
-  useEffect(() => {
-    if (selectedTopics.length === 0) {
-      setSelectedSubTopics([]);
-      return;
-    }
-    fetchSubTopics(selectedTopics);
-  }, [selectedTopics]);
-
-  // Toggle Topic Selection
-  const handleTopicToggle = (topicId: string) => {
-    setSelectedTopics(prev =>
-      prev.includes(topicId)
-        ? prev.filter(t => t !== topicId)
-        : [...prev, topicId]
-    );
-  };
-
-  // Toggle Sub-topic Selection
-  const handleSubTopicToggle = (subTopicId: string) => {
-    setSelectedSubTopics(prev =>
-      prev.includes(subTopicId)
-        ? prev.filter(st => st !== subTopicId)
-        : [...prev, subTopicId]
-    );
-  };
-
+  // Validation function
   const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-    if (!name.trim()) newErrors.name = 'Test Name is required';
-    if (!subject) newErrors.subject = 'Subject selection is required';
-    if (selectedTopics.length === 0) newErrors.topics = 'Select at least one topic';
-    if (selectedSubTopics.length === 0) newErrors.sub_topics = 'Select at least one sub-topic';
+    const newErrors: Record<string, string> = {};
 
-    // Marking scheme validation
-    if (correctMarks === '' || isNaN(Number(correctMarks)) || Number(correctMarks) <= 0) {
-      newErrors.correct_marks = 'Correct answer marks must be positive';
+    if (!formData.name.trim()) {
+      newErrors.name = 'Test name is required';
     }
-    if (wrongMarks === '' || isNaN(Number(wrongMarks))) {
-      newErrors.wrong_marks = 'Wrong answer marks must be a number';
+    if (!formData.subject) {
+      newErrors.subject = 'Subject is required';
     }
-    if (unattemptMarks === '' || isNaN(Number(unattemptMarks))) {
-      newErrors.unattempt_marks = 'Unattempted marks must be a number';
+    if (!formData.type) {
+      newErrors.type = 'Test type is required';
     }
-    if (!totalTime || isNaN(Number(totalTime)) || Number(totalTime) <= 0) {
-      newErrors.total_time = 'Test duration must be a positive number';
+    if (formData.topics.length === 0) {
+      newErrors.topics = 'At least one topic must be selected';
     }
-    if (!totalMarks || isNaN(Number(totalMarks)) || Number(totalMarks) <= 0) {
-      newErrors.total_marks = 'Total marks must be a positive number';
+    if (formData.sub_topics.length === 0) {
+      newErrors.sub_topics = 'At least one sub-topic must be selected';
+    }
+    if (formData.correct_marks === undefined || isNaN(formData.correct_marks)) {
+      newErrors.correct_marks = 'Correct marks must be a valid number';
+    }
+    if (formData.wrong_marks === undefined || isNaN(formData.wrong_marks)) {
+      newErrors.wrong_marks = 'Wrong marks must be a valid number';
+    }
+    if (formData.unattempt_marks === undefined || isNaN(formData.unattempt_marks)) {
+      newErrors.unattempt_marks = 'Unattempted marks must be a valid number';
+    }
+
+    if (!formData.total_time || formData.total_time <= 0) {
+      newErrors.total_time = 'Total time must be greater than 0';
+    }
+    if (!formData.total_marks || formData.total_marks <= 0) {
+      newErrors.total_marks = 'Total marks must be greater than 0';
+    }
+    if (!formData.total_questions || formData.total_questions <= 0) {
+      newErrors.total_questions = 'Total questions must be greater than 0';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const getFormPayload = (statusOverride: string | null = null) => {
-    return {
-      name: name.trim(),
-      type,
-      subject,
-      topics: selectedTopics,
-      sub_topics: selectedSubTopics,
-      difficulty,
-      correct_marks: Number(correctMarks),
-      wrong_marks: Number(wrongMarks),
-      unattempt_marks: Number(unattemptMarks),
-      total_time: Number(totalTime),
-      total_marks: Number(totalMarks),
-      status: statusOverride // if null, backend defaults/maintains status
-    };
-  };
-
-  const handleSaveDraft = async () => {
+  // Submit test configuration
+  const saveTestConfig = async (statusOverride?: 'draft' | 'live') => {
     if (!validateForm()) {
-      toast.warning('Please fill all required fields correctly.');
-      return;
+      toast.error('Please correct the validation errors in the form.');
+      return null;
     }
 
-    setPageLoading(true);
+    setIsSaving(true);
     try {
-      const payload = getFormPayload('draft');
+      const payload = {
+        ...formData,
+        status: statusOverride || 'draft'
+      };
+
       let response;
       if (isEditMode && id) {
         response = await updateTest(id, payload);
@@ -224,86 +257,56 @@ const CreateTestPage: React.FC = () => {
         response = await createTest(payload);
       }
 
-      if (response.success) {
-        toast.success('Test draft saved successfully');
-        navigate('/');
-      }
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to save test draft');
-    } finally {
-      setPageLoading(false);
-    }
-  };
-
-  const handleNextStep = async () => {
-    if (!validateForm()) {
-      toast.warning('Please fill all required fields correctly.');
-      return;
-    }
-
-    setPageLoading(true);
-    try {
-      const payload = getFormPayload();
-      let response;
-      if (isEditMode && id) {
-        response = await updateTest(id, payload);
+      if (response.status || response.success) {
+        return response.data;
       } else {
-        response = await createTest(payload);
-      }
-
-      if (response.success && response.data) {
-        toast.success('Test details saved, proceeding to questions');
-        const testId = response.data.id;
-        navigate(`/test/${testId}/questions`);
+        throw new Error(response.message || 'API operation returned failure status');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Failed to save test details');
+      toast.error(err.message || `Failed to ${isEditMode ? 'update' : 'create'} test.`);
+      return null;
     } finally {
-      setPageLoading(false);
+      setIsSaving(false);
     }
   };
 
-  const activeLoading = storeLoading || pageLoading;
+  const handleSaveAsDraft = async () => {
+    const savedTest = await saveTestConfig('draft');
+    if (savedTest) {
+      toast.success(`Test saved as draft successfully!`);
+      navigate('/');
+    }
+  };
+
+  const handleNextAddQuestions = async () => {
+    const savedTest = await saveTestConfig();
+    if (savedTest) {
+      toast.success(`Test setup saved! Moving to questions section.`);
+      navigate(`/test/${savedTest.id}/questions`);
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/');
+  };
 
   return (
-    <CreateTestView
-      isEditMode={isEditMode}
-      name={name}
-      setName={setName}
-      subject={subject}
-      handleSubjectChange={handleSubjectChange}
-      type={type}
-      setType={setType}
-      selectedTopics={selectedTopics}
-      handleTopicToggle={handleTopicToggle}
-      selectedSubTopics={selectedSubTopics}
-      handleSubTopicToggle={handleSubTopicToggle}
-      difficulty={difficulty}
-      setDifficulty={setDifficulty}
-      correctMarks={correctMarks}
-      setCorrectMarks={setCorrectMarks}
-      wrongMarks={wrongMarks}
-      setWrongMarks={setWrongMarks}
-      unattemptMarks={unattemptMarks}
-      setUnattemptMarks={setUnattemptMarks}
-      totalTime={totalTime}
-      setTotalTime={setTotalTime}
-      totalMarks={totalMarks}
-      setTotalMarks={setTotalMarks}
-      subjectsOptions={subjectsOptions}
-      topicsOptions={topicsOptions}
-      subTopicsOptions={subTopicsOptions}
-      pageLoading={activeLoading}
-      errors={errors}
-      topicsDropdownOpen={topicsDropdownOpen}
-      setTopicsDropdownOpen={setTopicsDropdownOpen}
-      subTopicsDropdownOpen={subTopicsDropdownOpen}
-      setSubTopicsDropdownOpen={setSubTopicsDropdownOpen}
-      topicsRef={topicsRef}
-      subTopicsRef={subTopicsRef}
-      handleSaveDraft={handleSaveDraft}
-      handleNextStep={handleNextStep}
-    />
+    <>
+      <PageLoaderComponent isLoading={loading || isSaving} />
+      <CreateTestView
+        testId={id}
+        formData={formData}
+        setFormData={setFormData}
+        subjects={subjectsList}
+        topics={topicsList}
+        subTopics={subTopicsList}
+        loading={loading}
+        errors={errors}
+        isSaving={isSaving}
+        onNextAddQuestions={handleNextAddQuestions}
+        onCancel={handleCancel}
+      />
+    </>
   );
 };
 

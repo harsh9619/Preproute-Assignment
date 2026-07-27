@@ -12,16 +12,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
   const activePath = location.pathname;
 
+  const isCreationActive = activePath.startsWith('/create-test') || activePath.startsWith('/edit-test') || activePath.startsWith('/test/');
+
   const menuItems = [
     {
       path: '/',
       label: 'Dashboard',
-      icon: <LayoutDashboard size={22} />
+      icon: <LayoutDashboard size={20} />,
+      active: activePath === '/'
     },
     {
       path: '/create-test',
-      label: 'Create Test',
-      icon: <PlusCircle size={22} />
+      label: 'Test Creation',
+      icon: <PlusCircle size={20} />,
+      active: isCreationActive
+    },
+    {
+      path: '#',
+      label: 'Test Tracking',
+      icon: <LayoutDashboard size={20} />,
+      active: false
     }
   ];
 
@@ -47,17 +57,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-1">
-          {menuItems.map((item) => {
-            const isActive = activePath === item.path || (item.path !== '/' && activePath.startsWith(item.path));
+          {menuItems.map((item, idx) => {
+            const isActive = item.active;
             return (
               <Link
-                key={item.path}
+                key={idx}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  isActive
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive
                     ? 'bg-indigo-50 text-indigo-600'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                  }`}
+                style={item.path === '#' ? { opacity: 0.6, cursor: 'default' } : undefined}
+                onClick={(e) => {
+                  if (item.path === '#') e.preventDefault();
+                }}
               >
                 <div className={`${isActive ? 'text-indigo-600' : 'text-slate-400'}`}>
                   {item.icon}

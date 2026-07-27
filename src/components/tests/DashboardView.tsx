@@ -8,8 +8,9 @@ import {
 import { Table, Tag, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { getDashboardColumns, NO_DATA } from '../../constants';
-import NoData from '../common/noData';
+import NoData from '../common/NoData';
 import PageLoaderComponent from '../common/page-loader';
+import CommonModal from '../common/Modal';
 
 const DashboardView: React.FC<DashboardViewProps> = ({
   subjects,
@@ -56,8 +57,9 @@ const DashboardView: React.FC<DashboardViewProps> = ({
   };
 
   return (
-    <div className="animate-fade-in">
+    <>
       <PageLoaderComponent isLoading={loading} />
+      <div className="animate-fade-in">
 
       {/* Sub Header with Breadcrumbs */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-slate-200/60">
@@ -72,6 +74,18 @@ const DashboardView: React.FC<DashboardViewProps> = ({
             Dashboard
           </h2>
         </div>
+
+        <Button
+          key="edit"
+          type="primary"
+          onClick={() => {
+            navigate(`/create-test`);
+          }}
+        >
+          <Plus size={18} /> Create New Test
+        </Button>
+
+
 
 
       </div>
@@ -244,13 +258,11 @@ const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="glass-card animate-fade-in" style={{ padding: '1rem', overflowX: 'auto', border: '1px solid var(--border-color)', minHeight: '520px', display: 'flex', flexDirection: 'column' }}>
         <Table
           bordered
-          // loading={loading}
           columns={columns}
           dataSource={filteredTests.map((item, index) => ({
             ...item,
             key: `${item?.id}-${index + 1}`,
           }))}
-          pagination
           scroll={{ y: 'calc(100vh - 35rem)' }}
           style={{ minHeight: '420px' }}
           locale={{
@@ -269,153 +281,9 @@ const DashboardView: React.FC<DashboardViewProps> = ({
           }}
         />
       </div>
-
-
-      {/* VIEW MODAL DRAWER */}
-      {viewTest && (
-        <div className="modal-overlay" onClick={() => setViewTest(null)}>
-          <div className="modal-content animate-fade-in" style={{ maxWidth: '800px', width: '95%', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
-              <div>
-                <span className={`badge badge-${viewTest.status}`} style={{ marginBottom: '0.5rem' }}>{viewTest.status}</span>
-                <h2 style={{ fontSize: '1.5rem' }}>{viewTest.name}</h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>
-                  Created on: {new Date(viewTest.created_at).toLocaleDateString()}
-                </p>
-              </div>
-              <button onClick={() => setViewTest(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem', background: 'var(--bg-primary)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
-              <div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Subject</div>
-                <div style={{ fontWeight: 600, marginTop: '0.1rem' }}>{viewTest.subjectName || viewTest.subject}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Difficulty Level</div>
-                <div style={{ fontWeight: 600, marginTop: '0.1rem', textTransform: 'capitalize' }}>{viewTest.difficulty}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Allocated Time</div>
-                <div style={{ fontWeight: 600, marginTop: '0.1rem' }}>{viewTest.total_time} minutes</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Marking Rules</div>
-                <div style={{ fontWeight: 600, marginTop: '0.1rem', fontSize: '0.85rem' }}>
-                  Correct: <span style={{ color: 'var(--success)' }}>+{viewTest.correct_marks}</span> |
-                  Wrong: <span style={{ color: 'var(--danger)' }}>{viewTest.wrong_marks}</span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                Questionnaire ({viewQuestions.length} questions / {viewTest.total_marks} Marks)
-              </h3>
-
-              {viewQuestions.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-muted)' }}>
-                  This test doesn't contain any questions yet.
-                  {viewTest.status === 'draft' && (
-                    <div style={{ marginTop: '1rem' }}>
-                      <button
-                        onClick={() => {
-                          setViewTest(null);
-                          navigate(`/test/${viewTest.id}/questions`);
-                        }}
-                        className="btn btn-primary"
-                        style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
-                      >
-                        Add Questions Now
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {viewQuestions.map((q, idx) => (
-                    <div key={q.id || idx} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '1rem', background: 'var(--bg-primary)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                        <span style={{ fontWeight: 700, color: 'var(--accent-primary)', fontSize: '0.95rem' }}>Q{idx + 1}.</span>
-                        <div style={{ flex: 1, fontSize: '0.95rem', fontWeight: 550 }}>{q.question}</div>
-                        {q.difficulty && <span className={`badge badge-${q.difficulty}`} style={{ fontSize: '0.65rem' }}>{q.difficulty}</span>}
-                      </div>
-
-                      {q.media_url && (
-                        <div style={{ marginBottom: '1rem' }}>
-                          <img src={q.media_url} alt="Question Graphic" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px' }} />
-                        </div>
-                      )}
-
-                      <div className="options-list" style={{ marginTop: '0.5rem', marginBottom: '0.75rem' }}>
-                        <div className={`option-item ${q.correct_option === 'option1' ? 'correct' : ''}`}>
-                          <strong>A.</strong> {q.option1}
-                        </div>
-                        <div className={`option-item ${q.correct_option === 'option2' ? 'correct' : ''}`}>
-                          <strong>B.</strong> {q.option2}
-                        </div>
-                        <div className={`option-item ${q.correct_option === 'option3' ? 'correct' : ''}`}>
-                          <strong>C.</strong> {q.option3}
-                        </div>
-                        <div className={`option-item ${q.correct_option === 'option4' ? 'correct' : ''}`}>
-                          <strong>D.</strong> {q.option4}
-                        </div>
-                      </div>
-
-                      {q.explanation && (
-                        <div style={{ background: 'var(--bg-secondary)', padding: '0.75rem', borderRadius: '4px', borderLeft: '3px solid var(--accent-primary)', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                          <strong>Explanation:</strong> {q.explanation}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2rem', gap: '0.5rem' }}>
-              <button onClick={() => setViewTest(null)} className="btn btn-secondary">
-                Close Preview
-              </button>
-              {viewTest.status === 'draft' && (
-                <button
-                  onClick={() => {
-                    setViewTest(null);
-                    navigate(`/test/${viewTest.id}/questions`);
-                  }}
-                  className="btn btn-primary"
-                >
-                  Edit Questions
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DELETE CONFIRMATION MODAL */}
-      {deleteId && (
-        <div className="modal-overlay" onClick={() => setDeleteId(null)}>
-          <div className="modal-content animate-fade-in" style={{ maxWidth: '400px' }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ fontSize: '1.2rem', marginBottom: '0.75rem' }}>Confirm Deletion</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-              Are you sure you want to delete this test? All questions associated with this test will also be deleted. This action cannot be undone.
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-              <button onClick={() => setDeleteId(null)} className="btn btn-secondary">
-                Cancel
-              </button>
-              <button onClick={handleConfirmDelete} className="btn btn-danger">
-                Delete Test
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  );
+  </>
+);
 };
 
 export default DashboardView;

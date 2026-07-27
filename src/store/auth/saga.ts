@@ -20,7 +20,7 @@ function* handleLogin(action: any): Generator<any, void, any> {
       localStorage.setItem('preproute_user', JSON.stringify(user));
 
       yield put(loginSuccess({ user, token }));
-      resolve({ success: true });
+      resolve({ success: true, user });
     } else {
       yield put(loginFailure('Authentication failed'));
       resolve({ success: false, message: 'Authentication failed' });

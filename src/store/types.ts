@@ -4,6 +4,7 @@ import {
 
 export interface User {
   userId: string;
+  name?: string;
 }
 
 export interface AuthState {
@@ -124,5 +125,34 @@ export interface DashboardViewProps {
   handleConfirmDelete: () => void;
   handleViewClick: (testId: string, e: React.MouseEvent) => void;
   navigate: (path: string) => void;
+}
+
+export interface TestFormData {
+  name: string;
+  subject: string;
+  type: 'chapterwise' | 'full_mock' | 'topic_test';
+  topics: string[];
+  sub_topics: string[];
+  difficulty: 'easy' | 'medium' | 'hard';
+  correct_marks: number;
+  wrong_marks: number;
+  unattempt_marks: number;
+  total_time: number;
+  total_marks: number;
+  total_questions: number;
+}
+
+export interface CreateTestViewProps {
+  testId?: string;
+  formData: TestFormData;
+  setFormData: React.Dispatch<React.SetStateAction<TestFormData>>;
+  subjects: Subject[];
+  topics: Topic[];
+  subTopics: SubTopic[];
+  loading: boolean;
+  errors: Record<string, string>;
+  isSaving: boolean;
+  onNextAddQuestions: () => void;
+  onCancel: () => void;
 }
 
