@@ -57,7 +57,7 @@ const DashboardPage: React.FC = () => {
     setViewLoading(true);
     try {
       const response = await deleteTest(deleteId);
-      if (response.status) {
+      if (response.status || response.success) {
         toast.success(response?.message || 'Test deleted successfully');
       }
     } catch (err: any) {
@@ -73,13 +73,13 @@ const DashboardPage: React.FC = () => {
     setViewLoading(true);
     try {
       const response = await api.getTest(testId);
-      if (response.status) {
+      if (response.status || response.success) {
         const testObj: Test = response.data;
         setViewTest(testObj);
 
         if (testObj.questions && testObj.questions.length > 0) {
           const qRes = await api.fetchQuestionsBulk(testObj.questions);
-          if (qRes.status) {
+          if (qRes.status || qRes.success) {
             setViewQuestions(qRes.data);
           }
         } else {

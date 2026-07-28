@@ -1,25 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Test, Question } from '../../store/types';
+import { PreviewPublishViewProps } from '../../store/types';
 import {
-  ArrowLeft, Edit2, CheckCircle2, Circle, Clock,
-  FileText, Award, Calendar, ChevronDown, CheckCircle, BookOpen, EyeIcon
+  Edit2, CheckCircle2, Clock,
+  FileText, Award, ChevronDown, BookOpen, EyeIcon
 } from 'lucide-react';
 import CommonModal from '../common/Modal';
-interface PreviewPublishViewProps {
-  testId: string | undefined;
-  test: Test | null;
-  subjectName: string;
-  topicsNames: string[];
-  questions: Question[];
-  loading: boolean;
-  publishing: boolean;
-  expandedIndices: number[];
-  toggleAccordion: (idx: number) => void;
-  handlePublish: () => void;
-  publishTab: 'now' | 'schedule';
-  setPublishTab: (tab: 'now' | 'schedule') => void;
-}
+import PageLoaderComponent from '../common/page-loader';
 
 const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
   testId,
@@ -48,11 +35,9 @@ const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
 
   if (loading && !test) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-        <div className="pulse-glow" style={{ display: 'inline-block', padding: '1.5rem 3rem', borderRadius: '12px', background: 'var(--bg-primary)' }}>
-          Compiling test preview...
-        </div>
-      </div>
+
+      <PageLoaderComponent />
+
     );
   }
 
@@ -84,10 +69,10 @@ const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
         <div className="text-sm font-semibold text-slate-400 select-none">Test creation</div>
       </div>
 
-      <div className="flex gap-6 items-start flex-1">
+      <div className="flex flex-col lg:flex-row gap-6 items-start flex-1 w-full">
 
         {/* Sub-Sidebar: Question Checklist */}
-        <aside className="w-64 bg-white border border-slate-100 rounded-2xl p-4 flex flex-col max-h-[calc(100vh-140px)] select-none">
+        <aside className="w-full lg:w-64 bg-white border border-slate-100 rounded-2xl p-4 flex flex-col lg:max-h-[calc(100vh-140px)] select-none flex-shrink-0">
           <div className="flex items-center justify-between border-b border-slate-50 pb-3 mb-3">
             <span className="text-sm font-bold text-slate-800">Question creation</span>
             <span className="text-xs text-slate-400">&lt;&lt;</span>
@@ -423,11 +408,11 @@ const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
             </div>
 
             {/* Footer confirmation triggers */}
-            <div className="flex justify-end gap-3 mt-8 border-t border-slate-100 pt-6">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 border-t border-slate-100 pt-6">
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="btn btn-secondary px-6 h-11"
+                className="btn btn-secondary w-full sm:w-auto px-6 h-11 flex items-center justify-center"
               >
                 Cancel
               </button>
@@ -435,7 +420,7 @@ const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
                 type="button"
                 onClick={handlePublish}
                 disabled={publishing}
-                className="btn btn-primary px-8 h-11 shadow-sm"
+                className="btn btn-primary w-full sm:w-auto px-8 h-11 shadow-sm flex items-center justify-center"
               >
                 {publishing ? 'Publishing...' : 'Confirm'}
               </button>

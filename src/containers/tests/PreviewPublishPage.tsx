@@ -6,9 +6,9 @@ import { Test, Question } from '../../store/types';
 import PreviewPublishView from '../../components/tests/PreviewPublishView';
 import CommonModal from '../../components/common/Modal';
 import {
-  ArrowLeft, Edit2, CheckCircle2, Circle, Clock,
-  FileText, Award, Calendar, ChevronDown, CheckCircle
+  CheckCircle
 } from 'lucide-react';
+import PageLoaderComponent from '../../components/common/page-loader';
 
 const PreviewPublishPage: React.FC = () => {
   const { id: testId } = useParams<{ id: string }>();
@@ -40,7 +40,7 @@ const PreviewPublishPage: React.FC = () => {
         setTest(testObj);
 
         const subjectsRes = await api.getSubjects();
-        if (subjectsRes.status) {
+        if (subjectsRes.status || subjectsRes.success) {
           const sObj = subjectsRes.data.find((s: any) => s.name === testObj.subject);
           setSubjectName(sObj ? sObj.name : testObj.subject);
         }
@@ -107,6 +107,7 @@ const PreviewPublishPage: React.FC = () => {
 
   return (
     <>
+      <PageLoaderComponent isLoading={loading} />
       <PreviewPublishView
         testId={testId}
         test={test}

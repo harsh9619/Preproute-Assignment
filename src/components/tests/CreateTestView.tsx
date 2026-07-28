@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { TestFormData, CreateTestViewProps } from '../../store/types';
 import { Select } from 'antd';
+import PageLoaderComponent from '../common/page-loader';
 
 const CreateTestView: React.FC<CreateTestViewProps> = ({
   isEditMode,
@@ -35,11 +36,7 @@ const CreateTestView: React.FC<CreateTestViewProps> = ({
 
   if (loading && subjects.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '6rem 0' }}>
-        <div className="pulse-glow" style={{ display: 'inline-block', padding: '2rem 4rem', borderRadius: '12px', background: 'var(--bg-primary)' }}>
-          Loading form configurations...
-        </div>
-      </div>
+      <PageLoaderComponent />
     );
   }
 
@@ -299,22 +296,22 @@ const CreateTestView: React.FC<CreateTestViewProps> = ({
 
 
 
-        <div className="flex justify-between items-center gap-4 mt-10 pt-6 border-t border-slate-100 select-none">
-          <span>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mt-10 pt-6 border-t border-slate-100 select-none">
+          <div className="w-full sm:w-auto">
             {!isEditMode && <button
               type="button"
-              className="btn btn-secondary px-6 h-11 font-semibold transition-colors shadow-xs"
+              className="btn btn-secondary w-full sm:w-auto px-6 h-11 font-semibold transition-colors shadow-xs"
               onClick={onSaveAsDraft}
               disabled={isSaving}
               style={{ borderRadius: '10px', minWidth: '120px' }}
             >
               Save as Draft
             </button>}
-          </span>
-          <span>
+          </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             <button
               type="button"
-              className="btn px-6 h-11 text-indigo-600 bg-slate-50 hover:bg-slate-100 transition-colors border border-transparent font-semibold"
+              className="btn px-6 h-11 text-indigo-600 bg-slate-50 hover:bg-slate-100 transition-colors border border-transparent font-semibold w-full sm:w-auto"
               onClick={onCancel}
               disabled={isSaving}
               style={{ borderRadius: '10px', minWidth: '100px' }}
@@ -324,14 +321,14 @@ const CreateTestView: React.FC<CreateTestViewProps> = ({
 
             <button
               type="button"
-              className="btn btn-primary px-8 h-11 flex items-center justify-center font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-xs"
+              className="btn btn-primary px-8 h-11 flex items-center justify-center font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-xs w-full sm:w-auto"
               onClick={onNextAddQuestions}
               disabled={isSaving}
               style={{ borderRadius: '10px', minWidth: '100px' }}
             >
               {isSaving ? 'Saving...' : 'Next'}
             </button>
-          </span>
+          </div>
         </div>
 
       </div>

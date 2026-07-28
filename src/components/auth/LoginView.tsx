@@ -44,14 +44,14 @@ const LoginView: React.FC<LoginViewProps> = ({
       </div>
 
       {/* Right — 50% login panel */}
-      <div className="w-full lg:w-1/2 h-[calc(100vh-2rem)] bg-white rounded-2xl border border-blue-100 shadow-sm overflow-y-auto flex items-center justify-center">
-        <div className="min-w-4/5 mx-auto px-8 sm:px-12 py-12">
+      <div className="w-full lg:w-1/2 min-h-[calc(100vh-2rem)] lg:h-[calc(100vh-2rem)] bg-white rounded-2xl border border-blue-100 shadow-sm overflow-y-auto flex items-center justify-center p-4">
+        <div className="w-full max-w-sm mx-auto px-4 py-8 sm:px-12 sm:py-12">
           {/* Logo */}
           <div className="mb-10">
             <img
               src={LOGO}
               alt="Logo"
-              className="max-w-4/5 "
+              className="max-w-[140px]"
             />
           </div>
 

@@ -87,8 +87,6 @@ const CreateTestPage: React.FC = () => {
             // Fetch subtopics for these topics
             let subTopicIds: string[] = [];
             if (topicIds.length > 0) {
-              console.log("topicIds", topicIds);
-              debugger
               const subTopicsRes = await api.getSubTopicsMulti(topicIds);
               if (subTopicsRes.status || subTopicsRes.success) {
                 setSubTopicsList(subTopicsRes.data);

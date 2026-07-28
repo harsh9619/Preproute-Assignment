@@ -1,67 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Test, Topic, SubTopic, Question } from '../../store/types';
+import { Test, Topic, SubTopic, Question, AddQuestionsViewProps, LocalQuestion } from '../../store/types';
 import {
   ArrowLeft, Edit2, Trash2, HelpCircle, ChevronRight,
   ChevronLeft, Plus, Clock, FileText, Award, CheckCircle2,
   Circle, Image as ImageIcon, MessageSquare, Tag, FileDown
 } from 'lucide-react';
-
-interface LocalQuestion extends Question {
-  type: string;
-  test_id?: string;
-  topic_id?: string;
-  sub_topic_id?: string;
-  subject?: string;
-}
-
-interface AddQuestionsViewProps {
-  testId: string | undefined;
-  test: Test | null;
-  subjectName: string;
-  topicOptions: Topic[];
-  subTopicOptions: SubTopic[];
-  loading: boolean;
-  questions: LocalQuestion[];
-  activeQuestionIndex: number;
-  handleSelectQuestionSlot: (idx: number) => void;
-  handlePrevQuestion: () => void;
-  handleNextQuestion: () => void;
-  handleDeleteAllEdits: () => void;
-  handleDeleteQuestion: (idx: number) => void;
-  handleAddNewQuestion: () => void;
-  qText: string;
-  setQText: (val: string) => void;
-  opt1: string;
-  setOpt1: (val: string) => void;
-  opt2: string;
-  setOpt2: (val: string) => void;
-  opt3: string;
-  setOpt3: (val: string) => void;
-  opt4: string;
-  setOpt4: (val: string) => void;
-  correctOpt: string;
-  setCorrectOpt: (val: string) => void;
-  explanation: string;
-  setExplanation: (val: string) => void;
-  qDifficulty: 'easy' | 'medium' | 'hard';
-  setQDifficulty: (val: 'easy' | 'medium' | 'hard') => void;
-  qTopic: string;
-  setQTopic: (val: string) => void;
-  qSubTopic: string;
-  setQSubTopic: (val: string) => void;
-  mediaUrl: string;
-  setMediaUrl: (val: string) => void;
-  errors: {
-    qText?: string;
-    opt1?: string;
-    opt2?: string;
-    opt3?: string;
-    opt4?: string;
-  };
-  handleSaveAndContinue: () => void;
-  handlePublish: () => void;
-}
+import PageLoaderComponent from '../common/page-loader';
 
 const AddQuestionsView: React.FC<AddQuestionsViewProps> = ({
   testId,
@@ -106,13 +51,10 @@ const AddQuestionsView: React.FC<AddQuestionsViewProps> = ({
 }) => {
   const totalQuestionsCount = test?.total_questions || 0;
 
+
   if (loading && !test) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-        <div className="pulse-glow" style={{ display: 'inline-block', padding: '1.5rem 3rem', borderRadius: '12px', background: 'var(--bg-primary)' }}>
-          Preparing test context...
-        </div>
-      </div>
+      <PageLoaderComponent />
     );
   }
 
@@ -166,10 +108,10 @@ const AddQuestionsView: React.FC<AddQuestionsViewProps> = ({
         </button>
       </div>
 
-      <div className="flex gap-6 items-start flex-1">
+      <div className="flex flex-col lg:flex-row gap-6 items-start flex-1 w-full">
 
         {/* Sub-Sidebar: Question Checklist */}
-        <aside className="w-64 bg-white border border-slate-100 rounded-2xl p-4 flex flex-col max-h-[calc(100vh-140px)] select-none">
+        <aside className="w-full lg:w-64 bg-white border border-slate-100 rounded-2xl p-4 flex flex-col lg:max-h-[calc(100vh-140px)] select-none flex-shrink-0">
           <div className="flex items-center justify-between border-b border-slate-50 pb-3 mb-3">
             <span className="text-sm font-bold text-slate-800">Question creation</span>
             <span className="text-xs text-slate-400 cursor-pointer hover:text-slate-600">&lt;&lt;</span>
@@ -617,17 +559,17 @@ const AddQuestionsView: React.FC<AddQuestionsViewProps> = ({
             </div>
 
             {/* Footer Navigation Buttons */}
-            <div className="flex justify-end gap-3 mt-8 border-t border-slate-100 pt-6">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 border-t border-slate-100 pt-6">
               <Link
                 to="/"
-                className="btn btn-secondary px-6 h-11"
+                className="btn btn-secondary w-full sm:w-auto px-6 h-11 flex items-center justify-center"
               >
                 Cancel
               </Link>
               <button
                 type="button"
                 onClick={handleSaveAndContinue}
-                className="btn btn-primary px-8 h-11 shadow-xs"
+                className="btn btn-primary w-full sm:w-auto px-8 h-11 shadow-xs flex items-center justify-center"
               >
                 Save & Continue
               </button>

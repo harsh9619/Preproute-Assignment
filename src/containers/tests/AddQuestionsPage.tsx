@@ -2,26 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { api } from '../../services';
-import { Test, Topic, SubTopic, Question } from '../../store/types';
+import { Test, Topic, SubTopic, Question, LocalQuestion, QuestionFormErrors } from '../../store/types';
 import AddQuestionsView from '../../components/tests/AddQuestionsView';
-
-interface FormErrors {
-  qText?: string;
-  opt1?: string;
-  opt2?: string;
-  opt3?: string;
-  opt4?: string;
-}
-
-interface LocalQuestion extends Question {
-  type: string;
-  test_id?: string;
-  topic_id?: string;
-  sub_topic_id?: string;
-  subject?: string;
-  paragraph?: string;
-  category?: string;
-}
+import PageLoaderComponent from '../../components/common/page-loader';
 
 const AddQuestionsPage: React.FC = () => {
   const { id: testId } = useParams<{ id: string }>();
@@ -50,8 +33,7 @@ const AddQuestionsPage: React.FC = () => {
   const [qTopic, setQTopic] = useState('');
   const [qSubTopic, setQSubTopic] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
-
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<QuestionFormErrors>({});
 
   useEffect(() => {
     if (testId) {
@@ -63,12 +45,12 @@ const AddQuestionsPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await api.getTest(testId);
-      if (response.status && response.data) {
+      if ((response.status || response.success) && response.data) {
         const testObj: Test = response.data;
         setTest(testObj);
         // Fetch subject name
         const subjectsRes = await api.getSubjects();
-        if (subjectsRes.status) {
+        if (subjectsRes.status || subjectsRes.success) {
           const sObj = subjectsRes.data.find((s: any) => s.name === testObj.subject);
           setSubjectName(sObj ? sObj.name : testObj.subject);
         }
@@ -80,10 +62,9 @@ const AddQuestionsPage: React.FC = () => {
 
         let topicIds: string[] = [];
         let subTopicIds: string[] = [];
-
         // Fetch topics options
         const topicsRes = await api.getTopics(subjectId);
-        if (topicsRes.status) {
+        if (topicsRes.status || topicsRes.success) {
           if (testObj.topics && testObj.topics.length > 0) {
             topicIds = testObj.topics
               .map((tNameOrId: string) => {
@@ -103,7 +84,7 @@ const AddQuestionsPage: React.FC = () => {
         // Fetch sub-topics options
         if (topicIds && topicIds.length > 0) {
           const subRes = await api.getSubTopicsMulti(topicIds);
-          if (subRes.status) {
+          if (subRes.status || subRes.success) {
 
 
             // Resolve sub-topic names/ids to their corresponding IDs from subTopicsRes.data
@@ -126,7 +107,7 @@ const AddQuestionsPage: React.FC = () => {
         // Load existing questions if present on backend
         if (testObj.questions && testObj.questions.length > 0) {
           const questionsRes = await api.fetchQuestionsBulk(testObj.questions);
-          if (questionsRes.status && questionsRes.data.length > 0) {
+          if ((questionsRes.status || questionsRes.success) && questionsRes.data && questionsRes.data.length > 0) {
             const loadedQuestions: LocalQuestion[] = [];
             // Map each question to its corresponding index slot
             questionsRes.data.forEach((q: LocalQuestion, idx: number) => {
@@ -162,7 +143,7 @@ const AddQuestionsPage: React.FC = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
+    const newErrors: QuestionFormErrors = {};
     if (!qText.trim()) newErrors.qText = 'Question text is required';
     if (!opt1.trim()) newErrors.opt1 = 'Option A is required';
     if (!opt2.trim()) newErrors.opt2 = 'Option B is required';
@@ -449,7 +430,7 @@ const AddQuestionsPage: React.FC = () => {
 
     try {
       const qRes = await api.createQuestions(cleanedQuestions);
-      if (qRes.status && qRes.data) {
+      if ((qRes.status || qRes.success) && qRes.data) {
         const createdQIds = qRes.data.map((q: any) => q.id);
         const totalQs = createdQIds.length;
         const totalMarksVal = totalQs * (test?.correct_marks || 4);
@@ -479,47 +460,51 @@ const AddQuestionsPage: React.FC = () => {
 
 
   return (
-    <AddQuestionsView
-      testId={testId}
-      test={test}
-      subjectName={subjectName}
-      topicOptions={topicOptions}
-      subTopicOptions={subTopicOptions}
-      loading={loading}
-      questions={questions}
-      activeQuestionIndex={activeQuestionIndex}
-      handleSelectQuestionSlot={handleSelectQuestionSlot}
-      handlePrevQuestion={handlePrevQuestion}
-      handleNextQuestion={handleNextQuestion}
-      handleDeleteAllEdits={handleDeleteAllEdits}
-      handleDeleteQuestion={handleDeleteQuestion}
-      handleAddNewQuestion={handleAddNewQuestion}
-      qText={qText}
-      setQText={setQText}
-      opt1={opt1}
-      setOpt1={setOpt1}
-      opt2={opt2}
-      setOpt2={setOpt2}
-      opt3={opt3}
-      setOpt3={setOpt3}
-      opt4={opt4}
-      setOpt4={setOpt4}
-      correctOpt={correctOpt}
-      setCorrectOpt={setCorrectOpt}
-      explanation={explanation}
-      setExplanation={setExplanation}
-      qDifficulty={qDifficulty}
-      setQDifficulty={setQDifficulty}
-      qTopic={qTopic}
-      setQTopic={setQTopic}
-      qSubTopic={qSubTopic}
-      setQSubTopic={setQSubTopic}
-      mediaUrl={mediaUrl}
-      setMediaUrl={setMediaUrl}
-      errors={errors}
-      handleSaveAndContinue={handleSaveAndContinue}
-      handlePublish={handlePublish}
-    />
+    <>
+      <PageLoaderComponent isLoading={loading} />
+      <AddQuestionsView
+        testId={testId}
+        test={test}
+        subjectName={subjectName}
+        topicOptions={topicOptions}
+        subTopicOptions={subTopicOptions}
+        loading={loading}
+        questions={questions}
+        activeQuestionIndex={activeQuestionIndex}
+        handleSelectQuestionSlot={handleSelectQuestionSlot}
+        handlePrevQuestion={handlePrevQuestion}
+        handleNextQuestion={handleNextQuestion}
+        handleDeleteAllEdits={handleDeleteAllEdits}
+        handleDeleteQuestion={handleDeleteQuestion}
+        handleAddNewQuestion={handleAddNewQuestion}
+        qText={qText}
+        setQText={setQText}
+        opt1={opt1}
+        setOpt1={setOpt1}
+        opt2={opt2}
+        setOpt2={setOpt2}
+        opt3={opt3}
+        setOpt3={setOpt3}
+        opt4={opt4}
+        setOpt4={setOpt4}
+        correctOpt={correctOpt}
+        setCorrectOpt={setCorrectOpt}
+        explanation={explanation}
+        setExplanation={setExplanation}
+        qDifficulty={qDifficulty}
+        setQDifficulty={setQDifficulty}
+        qTopic={qTopic}
+        setQTopic={setQTopic}
+        qSubTopic={qSubTopic}
+        setQSubTopic={setQSubTopic}
+        mediaUrl={mediaUrl}
+        setMediaUrl={setMediaUrl}
+        errors={errors}
+        handleSaveAndContinue={handleSaveAndContinue}
+        handlePublish={handlePublish}
+      />
+    </>
+
   );
 };
 

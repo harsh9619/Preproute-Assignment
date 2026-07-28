@@ -158,3 +158,82 @@ export interface CreateTestViewProps {
   onSaveAsDraft: () => void;
 }
 
+export interface LocalQuestion extends Question {
+  type: string;
+  test_id?: string;
+  topic_id?: string;
+  sub_topic_id?: string;
+  subject?: string;
+}
+
+export interface AddQuestionsViewProps {
+  testId: string | undefined;
+  test: Test | null;
+  subjectName: string;
+  topicOptions: Topic[];
+  subTopicOptions: SubTopic[];
+  loading: boolean;
+  questions: LocalQuestion[];
+  activeQuestionIndex: number;
+  handleSelectQuestionSlot: (idx: number) => void;
+  handlePrevQuestion: () => void;
+  handleNextQuestion: () => void;
+  handleDeleteAllEdits: () => void;
+  handleDeleteQuestion: (idx: number) => void;
+  handleAddNewQuestion: () => void;
+  qText: string;
+  setQText: (val: string) => void;
+  opt1: string;
+  setOpt1: (val: string) => void;
+  opt2: string;
+  setOpt2: (val: string) => void;
+  opt3: string;
+  setOpt3: (val: string) => void;
+  opt4: string;
+  setOpt4: (val: string) => void;
+  correctOpt: string;
+  setCorrectOpt: (val: string) => void;
+  explanation: string;
+  setExplanation: (val: string) => void;
+  qDifficulty: 'easy' | 'medium' | 'hard';
+  setQDifficulty: (val: 'easy' | 'medium' | 'hard') => void;
+  qTopic: string;
+  setQTopic: (val: string) => void;
+  qSubTopic: string;
+  setQSubTopic: (val: string) => void;
+  mediaUrl: string;
+  setMediaUrl: (val: string) => void;
+  errors: {
+    qText?: string;
+    opt1?: string;
+    opt2?: string;
+    opt3?: string;
+    opt4?: string;
+  };
+  handleSaveAndContinue: () => void;
+  handlePublish: () => void;
+}
+
+export interface QuestionFormErrors {
+  qText?: string;
+  opt1?: string;
+  opt2?: string;
+  opt3?: string;
+  opt4?: string;
+}
+
+export interface PreviewPublishViewProps {
+  testId: string | undefined;
+  test: Test | null;
+  subjectName: string;
+  topicsNames: string[];
+  questions: Question[];
+  loading: boolean;
+  publishing: boolean;
+  expandedIndices: number[];
+  toggleAccordion: (idx: number) => void;
+  handlePublish: () => void;
+  publishTab: 'now' | 'schedule';
+  setPublishTab: (tab: 'now' | 'schedule') => void;
+}
+
