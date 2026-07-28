@@ -10,21 +10,11 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       proxy: {
         '/api': {
-          target: env.VITE_API_TARGET_URL || 'https://admin-moderator-backend-staging.up.railway.app/api',
-          changeOrigin: true,
-        }
-      }
-    },
-    server: {
-      port: "https://preproute-assignment-dist-production.up.railway.app",
-      proxy: {
-        '/api': {
-          target: env.VITE_API_TARGET_URL || 'https://admin-moderator-backend-staging.up.railway.app/api',
+          target: env.VITE_API_TARGET_URL,
           changeOrigin: true,
         }
       }
     }
-
   };
 });
 
