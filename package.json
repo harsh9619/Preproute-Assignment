@@ -1,6 +1,6 @@
 {
   "name": "preproute-test-management",
-  "private": true,
+  "homepage": "https://harsh9619.github.io/Preproute-Assignment",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -37,6 +37,5 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^5.3.1"
-  },
-  "proxy": "https://admin-moderator-backend-staging.up.railway.app"
+  }
 }
