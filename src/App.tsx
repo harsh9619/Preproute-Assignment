@@ -10,7 +10,7 @@ function App(): React.JSX.Element {
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnHover draggable />
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop closeOnClick pauseOnHover draggable />
         <AppRouter />
       </BrowserRouter>
     </Provider>
