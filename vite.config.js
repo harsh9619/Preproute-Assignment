@@ -6,24 +6,15 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [react(), tailwindcss()],
-    server: {
-      port: 5173,
-      proxy: {
-        '/api': {
-          target: env.VITE_API_TARGET_URL || 'https://admin-moderator-backend-staging.up.railway.app',
-          changeOrigin: true,
-        }
-      }
-    },
-    server: {
-      port: 8080,
-      proxy: {
-        '/api': {
-          target: env.VITE_API_TARGET_URL || 'https://admin-moderator-backend-staging.up.railway.app',
-          changeOrigin: true,
-        }
-      }
-    }
+    // server: {
+    //   port: 5173,
+    //   proxy: {
+    //     '/api': {
+    //       target: env.VITE_API_TARGET_URL || 'https://admin-moderator-backend-staging.up.railway.app/api',
+    //       changeOrigin: true,
+    //     }
+    //   }
+    // }
   };
 });
 
