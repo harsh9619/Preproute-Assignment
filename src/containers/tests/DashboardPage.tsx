@@ -39,12 +39,8 @@ const DashboardPage: React.FC = () => {
     if (initialized.current) return;
     initialized.current = true;
 
-    if (tests.length === 0) {
-      fetchTests();
-    }
-    if (subjects.length === 0) {
-      fetchSubjects();
-    }
+    fetchTests();
+    fetchSubjects();
   }, []);
 
   const handleDeleteClick = (id: string, e: React.MouseEvent) => {
