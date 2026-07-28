@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
       //     changeOrigin: true,
       //   }
       // },
+      port: 8080,
       proxy: {
         "/api": {
           target: "https://admin-moderator-backend-staging.up.railway.app",
