@@ -14,6 +14,15 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         }
       }
+    },
+    server: {
+      port: 8080,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_TARGET_URL || 'https://admin-moderator-backend-staging.up.railway.app',
+          changeOrigin: true,
+        }
+      }
     }
   };
 });
