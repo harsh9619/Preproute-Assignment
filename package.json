@@ -1,12 +1,17 @@
 {
   "name": "preproute-test-management",
-  "homepage": "https://harsh9619.github.io/Preproute-Assignment",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:dev": "vite --mode dev",
+    "dev:ft": "vite --mode ft",
+    "dev:prod": "vite --mode production",
     "build": "vite build",
+    "build:dev": "vite build --mode dev",
+    "build:ft": "vite build --mode ft",
+    "build:prod": "vite build --mode production",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist"
   },
