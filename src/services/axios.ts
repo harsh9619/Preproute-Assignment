@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create configured Axios instance
 const axiosInstance = axios.create({
-  baseURL: 'https://admin-moderator-backend-staging.up.railway.app',
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
