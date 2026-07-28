@@ -35,8 +35,8 @@ const CreateTestPage: React.FC = () => {
     wrong_marks: -1,
     unattempt_marks: 0,
     total_time: 60,
-    total_marks: 250,
-    total_questions: 50
+    total_marks: 100,
+    total_questions: 1
   });
 
   // Errors State
@@ -294,6 +294,7 @@ const CreateTestPage: React.FC = () => {
     <>
       <PageLoaderComponent isLoading={loading || isSaving} />
       <CreateTestView
+        isEditMode={isEditMode}
         testId={id}
         formData={formData}
         setFormData={setFormData}
@@ -305,6 +306,7 @@ const CreateTestPage: React.FC = () => {
         isSaving={isSaving}
         onNextAddQuestions={handleNextAddQuestions}
         onCancel={handleCancel}
+        onSaveAsDraft={handleSaveAsDraft}
       />
     </>
   );

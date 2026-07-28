@@ -143,6 +143,7 @@ export interface TestFormData {
 }
 
 export interface CreateTestViewProps {
+  isEditMode: boolean;
   testId?: string;
   formData: TestFormData;
   setFormData: React.Dispatch<React.SetStateAction<TestFormData>>;
@@ -154,5 +155,6 @@ export interface CreateTestViewProps {
   isSaving: boolean;
   onNextAddQuestions: () => void;
   onCancel: () => void;
+  onSaveAsDraft: () => void;
 }
 

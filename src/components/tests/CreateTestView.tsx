@@ -4,6 +4,7 @@ import { TestFormData, CreateTestViewProps } from '../../store/types';
 import { Select } from 'antd';
 
 const CreateTestView: React.FC<CreateTestViewProps> = ({
+  isEditMode,
   testId,
   formData,
   setFormData,
@@ -14,7 +15,8 @@ const CreateTestView: React.FC<CreateTestViewProps> = ({
   errors,
   isSaving,
   onNextAddQuestions,
-  onCancel
+  onCancel,
+  onSaveAsDraft
 }) => {
 
   const handleInputChange = (field: keyof TestFormData, value: any) => {
@@ -267,7 +269,7 @@ const CreateTestView: React.FC<CreateTestViewProps> = ({
               <input
                 type="number"
                 min={1}
-                placeholder="Ex:250 Marks"
+                placeholder="Ex:5 Questions"
                 className={`form-input w-full text-sm ${errors.total_questions ? 'border-red-500' : ''}`}
                 value={formData.total_questions || ''}
                 onChange={(e) => handleInputChange('total_questions', parseInt(e.target.value) || 0)}
@@ -282,7 +284,7 @@ const CreateTestView: React.FC<CreateTestViewProps> = ({
               <input
                 type="number"
                 min={1}
-                placeholder="Ex:250 Marks"
+                placeholder="Ex:100 Marks"
                 className={`form-input w-full text-sm ${errors.total_marks ? 'border-red-500' : ''}`}
                 value={formData.total_marks || ''}
                 onChange={(e) => handleInputChange('total_marks', parseInt(e.target.value) || 0)}
@@ -294,25 +296,42 @@ const CreateTestView: React.FC<CreateTestViewProps> = ({
         </div>
 
         {/* Bottom Actions Row */}
-        <div className="flex justify-end items-center gap-4 mt-10 pt-6 border-t border-slate-100 select-none">
-          <button
-            type="button"
-            className="btn px-6 h-11 text-indigo-600 bg-slate-50 hover:bg-slate-100 transition-colors border border-transparent font-semibold"
-            onClick={onCancel}
-            disabled={isSaving}
-            style={{ borderRadius: '10px', minWidth: '100px' }}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary px-8 h-11 flex items-center justify-center font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-xs"
-            onClick={onNextAddQuestions}
-            disabled={isSaving}
-            style={{ borderRadius: '10px', minWidth: '100px' }}
-          >
-            {isSaving ? 'Saving...' : 'Next'}
-          </button>
+
+
+
+        <div className="flex justify-between items-center gap-4 mt-10 pt-6 border-t border-slate-100 select-none">
+          <span>
+            {!isEditMode && <button
+              type="button"
+              className="btn btn-secondary px-6 h-11 font-semibold transition-colors shadow-xs"
+              onClick={onSaveAsDraft}
+              disabled={isSaving}
+              style={{ borderRadius: '10px', minWidth: '120px' }}
+            >
+              Save as Draft
+            </button>}
+          </span>
+          <span>
+            <button
+              type="button"
+              className="btn px-6 h-11 text-indigo-600 bg-slate-50 hover:bg-slate-100 transition-colors border border-transparent font-semibold"
+              onClick={onCancel}
+              disabled={isSaving}
+              style={{ borderRadius: '10px', minWidth: '100px' }}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-primary px-8 h-11 flex items-center justify-center font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-xs"
+              onClick={onNextAddQuestions}
+              disabled={isSaving}
+              style={{ borderRadius: '10px', minWidth: '100px' }}
+            >
+              {isSaving ? 'Saving...' : 'Next'}
+            </button>
+          </span>
         </div>
 
       </div>
