@@ -230,7 +230,7 @@ const DashboardPage: React.FC = () => {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-                  {viewQuestions.map((q, idx) => (
+                  {/* {viewQuestions.map((q, idx) => (
                     <div key={q.id || idx} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '1rem', background: 'var(--bg-primary)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.75rem' }}>
                         <span style={{ fontWeight: 700, color: 'var(--accent-primary)', fontSize: '0.95rem' }}>Q{idx + 1}.</span>
@@ -265,7 +265,67 @@ const DashboardPage: React.FC = () => {
                         </div>
                       )}
                     </div>
-                  ))}
+                  ))} */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-100 pb-2">Questions List</h3>
+                    {viewQuestions.length === 0 ? (
+                      <p className="text-xs text-slate-400 text-center py-4">No questions added yet.</p>
+                    ) : (
+                      viewQuestions.map((q, idx) => {
+                        return (
+                          <div
+                            key={q.id || idx}
+                            id={`modal-question-card-${idx}`}
+                            className="border rounded-xl p-4 space-y-3 transition-all scroll-mt-6 border-slate-100 bg-white"
+                          >
+                            <div className="flex justify-between items-start gap-4">
+                              <h4 className="text-sm font-bold text-slate-800">
+                                Q{idx + 1}. {q.question}
+                              </h4>
+                              <div className="flex items-center gap-2">
+                                {q.difficulty && (
+                                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${q.difficulty === 'easy' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                                    q.difficulty === 'hard' ? 'bg-rose-50 text-rose-600 border border-rose-200' :
+                                      'bg-amber-50 text-amber-600 border border-amber-200'
+                                    }`}>
+                                    {q.difficulty}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {q.media_url && (
+                              <div className="max-w-md rounded-lg overflow-hidden border border-slate-100 bg-white">
+                                <img src={q.media_url} alt={`Question ${idx + 1} media`} className="max-h-40 object-contain mx-auto" />
+                              </div>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-semibold">
+                              {[
+                                { label: 'A', field: 'option1', value: q.option1 },
+                                { label: 'B', field: 'option2', value: q.option2 },
+                                { label: 'C', field: 'option3', value: q.option3 },
+                                { label: 'D', field: 'option4', value: q.option4 },
+                              ].map((opt) => {
+                                const isCorrect = q.correct_option === opt.field;
+                                return (
+                                  <div
+                                    key={opt.field}
+                                    className="flex items-center gap-2 px-2.5 py-2 rounded-lg border transition border-slate-100 bg-slate-50/20 text-slate-600"
+                                  >
+                                    <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold bg-slate-200 text-slate-500">
+                                      {opt.label}
+                                    </span>
+                                    <span>{opt.value}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
               )}
             </div>

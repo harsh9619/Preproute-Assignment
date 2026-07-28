@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Test, Question } from '../../store/types';
 import {
   ArrowLeft, Edit2, CheckCircle2, Circle, Clock,
-  FileText, Award, Calendar, ChevronDown, CheckCircle, BookOpen
+  FileText, Award, Calendar, ChevronDown, CheckCircle, BookOpen, EyeIcon
 } from 'lucide-react';
 import CommonModal from '../common/Modal';
 interface PreviewPublishViewProps {
@@ -42,6 +42,9 @@ const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
   const [liveUntilOption, setLiveUntilOption] = useState<'always' | '1week' | '2weeks' | '3weeks' | '1month' | 'custom'>('custom');
   const [endDate, setEndDate] = useState(todayStr);
   const [endTime, setEndTime] = useState('');
+
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [selectedQuestionIndex, setSelectedQuestionIndex] = useState<number | null>(null);
 
   if (loading && !test) {
     return (
@@ -95,15 +98,37 @@ const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
 
           {/* Scrollable list (All slots green/completed) */}
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[500px]">
-            {Array.from({ length: qCount }).map((_, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between px-3 py-2.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 font-semibold animate-fade-in"
-              >
-                <span className="text-sm">Question {idx + 1}</span>
-                <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />
+            {questions.length === 0 ? (
+              <div className="text-center py-6 text-slate-400 text-xs font-medium">
+                No questions
               </div>
-            ))}
+            ) : (
+              questions.map((q, idx) => (
+                <div
+                  key={q.id || idx}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg border border-slate-100  bg-emerald-50 text-emerald-600 font-semibold animate-fade-in hover:border-indigo-350 hover:bg-indigo-50/10 cursor-pointer transition-all select-none"
+                  onClick={() => {
+                    setSelectedQuestionIndex(idx);
+                    setPreviewModalOpen(true);
+                    setTimeout(() => {
+                      const element = document.getElementById(`modal-question-card-${idx}`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }, 100);
+                  }}
+                >
+                  <div className="flex items-center gap-2 overflow-hidden flex-1">
+                    <span className="text-xs font-bold text-slate-700 truncate max-w-[110px]" title={q.question}>
+                      Question{idx + 1}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <CheckCircle2 size={14} className="text-emerald-500 flex-shrink-0" />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </aside>
 
@@ -113,9 +138,9 @@ const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
           {/* Test Status Header info */}
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold text-slate-800">Test created</h2>
-            <span className="inline-flex items-center gap-1 px-3 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-full text-xs font-bold">
+            <h3 className="inline-flex items-center gap-1 px-3 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-2xl text-xs font-bold">
               ✓ All {qCount} Questions done
-            </span>
+            </h3>
           </div>
 
           {/* Summary Properties Card */}
@@ -126,12 +151,27 @@ const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
                   {getTestTypeDisplayName()}
                 </span>
               </div>
-              <Link
-                to={`/edit-test/${testId}`}
-                className="p-2 text-indigo-600 hover:text-indigo-800 transition"
-              >
-                <Edit2 size={18} />
-              </Link>
+              <span className='flex gap-2'>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedQuestionIndex(null);
+                    setPreviewModalOpen(true);
+                  }}
+                  className="btn btn-secondary text-xs h-9 px-3 flex items-center gap-1 font-semibold text-indigo-600 bg-indigo-50/50 border border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 transition-colors shadow-xs cursor-pointer"
+                  style={{ borderRadius: '8px' }}
+                >
+                  <EyeIcon size={14} /> View questions
+                </button>
+                <Link
+                  to={`/edit-test/${testId}`}
+                  className="btn btn-secondary text-xs h-9 px-3 flex items-center gap-1 font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors shadow-xs"
+                  style={{ borderRadius: '8px' }}
+                >
+                  <Edit2 size={14} /> Edit Test
+                </Link>
+
+              </span>
             </div>
 
             <div className="flex justify-between items-end flex-wrap gap-4">
@@ -402,6 +442,127 @@ const PreviewPublishView: React.FC<PreviewPublishViewProps> = ({
             </div>
 
           </div>
+
+          {/* Test Preview Modal */}
+          <CommonModal
+            open={previewModalOpen}
+            onCancel={() => setPreviewModalOpen(false)}
+            footer={null}
+            width={800}
+            title={
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3 pr-6 select-none">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="text-indigo-600" size={20} />
+                  <span className="font-extrabold text-slate-800 text-lg">Test Overview & Preview</span>
+                </div>
+              </div>
+            }
+          >
+            <div className="max-h-[70vh] overflow-y-auto pr-2 space-y-6 pt-4">
+              {/* Test Details Card inside Modal */}
+              <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4 space-y-3">
+                <div className="flex justify-between items-start gap-4">
+                  <h3 className="text-sm font-extrabold text-slate-800">{test?.name}</h3>
+                  <Link
+                    to={`/test/${testId}/questions`}
+                    className="btn btn-secondary text-xs h-8 px-3 flex items-center gap-1 font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors shadow-xs"
+                    style={{ borderRadius: '6px' }}
+                  >
+                    <Edit2 size={12} /> Edit Questions
+                  </Link>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-slate-600">
+                  <div><span className="text-slate-400 font-semibold">Subject:</span> {subjectName}</div>
+                  <div><span className="text-slate-400 font-semibold">Difficulty:</span> {getDifficultyDisplayName()}</div>
+                  <div><span className="text-slate-400 font-semibold">Duration:</span> {test?.total_time} Minutes</div>
+                  <div><span className="text-slate-400 font-semibold">Total Marks:</span> {test?.total_marks} Marks</div>
+                  <div><span className="text-slate-400 font-semibold">Total Questions:</span> {qCount}</div>
+                  <div><span className="text-slate-400 font-semibold">Marking Scheme:</span> +{test?.correct_marks} / {test?.wrong_marks}</div>
+                </div>
+              </div>
+
+              {/* Questions inside Modal */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-extrabold text-slate-800 border-b border-slate-100 pb-2">Questions List</h3>
+                {questions.length === 0 ? (
+                  <p className="text-xs text-slate-400 text-center py-4">No questions added yet.</p>
+                ) : (
+                  questions.map((q, idx) => {
+                    const isSelected = selectedQuestionIndex === idx;
+                    return (
+                      <div
+                        key={q.id || idx}
+                        id={`modal-question-card-${idx}`}
+                        className={`border rounded-xl p-4 space-y-3 transition-all scroll-mt-6 ${isSelected
+                          ? 'border-indigo-300 bg-indigo-50/10 ring-2 ring-indigo-500/20 shadow-xs'
+                          : 'border-slate-100 bg-white'
+                          }`}
+                      >
+                        <div className="flex justify-between items-start gap-4">
+                          <h4 className="text-sm font-bold text-slate-800">
+                            Q{idx + 1}. {q.question}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            {q.difficulty && (
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${q.difficulty === 'easy' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                                q.difficulty === 'hard' ? 'bg-rose-50 text-rose-600 border border-rose-200' :
+                                  'bg-amber-50 text-amber-600 border border-amber-200'
+                                }`}>
+                                {q.difficulty}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {q.media_url && (
+                          <div className="max-w-md rounded-lg overflow-hidden border border-slate-100 bg-white">
+                            <img src={q.media_url} alt={`Question ${idx + 1} media`} className="max-h-40 object-contain mx-auto" />
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-semibold">
+                          {[
+                            { label: 'A', field: 'option1', value: q.option1 },
+                            { label: 'B', field: 'option2', value: q.option2 },
+                            { label: 'C', field: 'option3', value: q.option3 },
+                            { label: 'D', field: 'option4', value: q.option4 },
+                          ].map((opt) => {
+                            const isCorrect = q.correct_option === opt.field;
+                            return (
+                              <div
+                                key={opt.field}
+                                className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border transition ${isCorrect
+                                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold'
+                                  : 'border-slate-100 bg-slate-50/20 text-slate-600'
+                                  }`}
+                              >
+                                <span
+                                  className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${isCorrect
+                                    ? 'bg-emerald-500 text-white'
+                                    : 'bg-slate-200 text-slate-500'
+                                    }`}
+                                >
+                                  {opt.label}
+                                </span>
+                                <span>{opt.value}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {q.explanation && (
+                          <div className="text-[11px] text-slate-500 bg-slate-50/30 border border-slate-100 rounded-lg p-2.5">
+                            <strong className="text-slate-700 font-bold block mb-0.5">Explanation:</strong>
+                            {q.explanation}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </CommonModal>
 
         </div>
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import LOGIN_IMG from '../../style/images/img-login.svg';
 import LOGO from '../../style/images/img-logo.svg';
+import { AlertCircle } from 'lucide-react';
+import { Input } from 'antd';
 
 interface FormErrors {
   userId?: string;
@@ -15,6 +17,7 @@ interface LoginViewProps {
   errors: FormErrors;
   isSubmitting: boolean;
   handleSubmit: (e: React.FormEvent) => void;
+  onBlurField: (field: 'userId' | 'password') => void;
 }
 
 const LoginView: React.FC<LoginViewProps> = ({
@@ -24,7 +27,8 @@ const LoginView: React.FC<LoginViewProps> = ({
   setPassword,
   errors,
   isSubmitting,
-  handleSubmit
+  handleSubmit,
+  onBlurField
 }) => {
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row items-center bg-slate-50 p-4 sm:p-6 lg:p-4 gap-4 lg:gap-4">
@@ -33,19 +37,21 @@ const LoginView: React.FC<LoginViewProps> = ({
         <img
           src={LOGIN_IMG}
           alt="Login Illustration"
-          className="w-full max-w-xl"
+          className="w-full max-w-2xl lg:max-w-[75%] object-contain animate-fade-in"
+          style={{ maxWidth: '70%', height: 'auto' }}
+
         />
       </div>
 
       {/* Right — 50% login panel */}
       <div className="w-full lg:w-1/2 h-[calc(100vh-2rem)] bg-white rounded-2xl border border-blue-100 shadow-sm overflow-y-auto flex items-center justify-center">
-        <div className="max-w-md mx-auto px-8 sm:px-12 py-12">
+        <div className="min-w-4/5 mx-auto px-8 sm:px-12 py-12">
           {/* Logo */}
           <div className="mb-10">
             <img
               src={LOGO}
               alt="Logo"
-              className="w-full max-w-xl"
+              className="max-w-4/5 "
             />
           </div>
 
@@ -64,16 +70,23 @@ const LoginView: React.FC<LoginViewProps> = ({
               >
                 User ID
               </label>
-              <input
+              <Input
                 placeholder="Enter User ID"
                 id="userId"
-                type="text"
+                allowClear
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
+                onBlur={() => onBlurField('userId')}
                 disabled={isSubmitting}
-                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+                status={errors.userId ? 'error' : undefined}
+                style={{ height: '44px', borderRadius: '8px' }}
               />
-              {errors.userId && <span className="text-xs text-red-500">{errors.userId}</span>}
+              {errors.userId && (
+                <span className="flex items-center gap-1 text-xs font-medium text-red-500 mt-1.5 animate-shake-flicker">
+                  <AlertCircle size={14} className="flex-shrink-0" />
+                  {errors.userId}
+                </span>
+              )}
             </div>
 
             <div>
@@ -83,16 +96,23 @@ const LoginView: React.FC<LoginViewProps> = ({
               >
                 Password
               </label>
-              <input
+              <Input.Password
+                placeholder="Enter Password"
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter Password"
+                onBlur={() => onBlurField('password')}
                 disabled={isSubmitting}
-                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
+                status={errors.password ? 'error' : undefined}
+                style={{ height: '44px', borderRadius: '8px' }}
+
               />
-              {errors.password && <span className="text-xs text-red-500">{errors.password}</span>}
+              {errors.password && (
+                <span className="flex items-center gap-1 text-xs font-medium text-red-500 mt-1.5 animate-shake-flicker">
+                  <AlertCircle size={14} className="flex-shrink-0" />
+                  {errors.password}
+                </span>
+              )}
             </div>
 
             <div>

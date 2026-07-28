@@ -25,18 +25,44 @@ const LoginPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  const validateField = (field: 'userId' | 'password', value: string): string | undefined => {
+    if (field === 'userId') {
+      if (!value.trim()) {
+        return 'User ID is required';
+      }
+    }
+    if (field === 'password') {
+      if (!value) {
+        return 'Password is required';
+      } else if (value.length < 3) {
+        return 'Password must be at least 3 characters';
+      }
+    }
+    return undefined;
+  };
+
   const validateForm = (): boolean => {
+    const userIdError = validateField('userId', userId);
+    const passwordError = validateField('password', password);
     const newErrors: FormErrors = {};
-    if (!userId.trim()) {
-      newErrors.userId = 'User ID is required';
-    }
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 3) {
-      newErrors.password = 'Password must be at least 3 characters';
-    }
+    if (userIdError) newErrors.userId = userIdError;
+    if (passwordError) newErrors.password = passwordError;
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleBlur = (field: 'userId' | 'password') => {
+    const value = field === 'userId' ? userId : password;
+    const error = validateField(field, value);
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      if (error) {
+        newErrors[field] = error;
+      } else {
+        delete newErrors[field];
+      }
+      return newErrors;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,14 +74,14 @@ const LoginPage: React.FC = () => {
       const result = await login(userId.trim(), password);
       setIsSubmitting(false);
       if (result.success) {
-         toast.success(`Login successful! Welcome back ${result.user?.name || 'User'}!`);
-          navigate('/');
+        toast.success(`Login successful! Welcome back ${result.user?.name || 'User'}!`);
+        navigate('/');
       } else {
-         toast.error(result.message || 'Invalid User ID or password');
+        toast.error(result.message || 'Invalid User ID or password');
       }
     } catch (err: any) {
       setIsSubmitting(false);
-       toast.error(err.message || 'An error occurred during login');
+      toast.error(err.message || 'An error occurred during login');
     }
   };
 
@@ -68,6 +94,7 @@ const LoginPage: React.FC = () => {
       errors={errors}
       isSubmitting={isSubmitting}
       handleSubmit={handleSubmit}
+      onBlurField={handleBlur}
     />
   );
 };
