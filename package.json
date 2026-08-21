@@ -13,7 +13,6 @@
     "build:prod": "vite build --mode production",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
-    "start": "node server.js"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.2",

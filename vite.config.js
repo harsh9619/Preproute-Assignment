@@ -7,7 +7,6 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     server: {
-      port: 8080,
       proxy: {
         '/api': {
           target: env.VITE_API_TARGET_URL,
