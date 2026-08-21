@@ -12,10 +12,6 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_API_TARGET_URL,
           changeOrigin: true,
         }
-      },
-      build: {
-        outDir: 'dist',   // Ensure output goes to 'dist'
-        emptyOutDir: true,
       }
     }
   };
