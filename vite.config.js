@@ -6,16 +6,14 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [react(), tailwindcss()],
-
     server: {
+      port: 5173,
       proxy: {
-        "/api": {
-          target: "https://admin-moderator-backend-staging.up.railway.app",
+        '/api': {
+          target: env.VITE_API_TARGET_URL,
           changeOrigin: true,
-        },
-      },
-    },
-
+        }
+      }
+    }
   };
 });
-
