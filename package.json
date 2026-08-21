@@ -12,8 +12,7 @@
     "build:ft": "vite build --mode ft",
     "build:prod": "vite build --mode production",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist",
-    "start": "node server.js"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.2",
