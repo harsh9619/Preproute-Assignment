@@ -3,6 +3,7 @@ import axios from 'axios';
 // Create configured Axios instance
 const axiosInstance = axios.create({
   baseURL: '/api',
+  allowAbsoluteUrls: false,
   headers: {
     'Content-Type': 'application/json',
   },
