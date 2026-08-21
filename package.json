@@ -12,12 +12,15 @@
     "build:ft": "vite build --mode ft",
     "build:prod": "vite build --mode production",
     "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "start": "node server.js"
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.2",
     "antd": "^6.5.2",
     "axios": "^1.18.1",
+    "express": "^5.2.1",
+    "http-proxy-middleware": "^3.0.7",
     "lucide-react": "^0.400.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
