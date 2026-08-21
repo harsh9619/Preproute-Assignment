@@ -7,9 +7,10 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     server: {
-        proxy: {
+      port: 5173,
+      proxy: {
         '/api': {
-          target: 'https://admin-moderator-backend-staging.up.railway.app',
+          target: env.VITE_API_TARGET_URL,
           changeOrigin: true,
         }
       }
